@@ -1,0 +1,13 @@
+# 核心依赖
+paddleocr>=2.6.0
+openai>=1.0.0
+Pillow>=9.0.0
+numpy>=1.21.0
+pygetwindow>=0.0.9
+pywin32>=300
+
+# OCR模型依赖
+paddlepaddle>=2.4.0
+
+# 可选：GPU支持（如果有NVIDIA GPU）
+# paddlepaddle-gpu>=2.4.0

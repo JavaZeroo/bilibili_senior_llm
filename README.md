@@ -1,46 +1,239 @@
-# bilibili_senior_llm
+# 自动答题机器人 v2.0
 
-## 简介
+一个用于在安卓模拟器上自动获取题目并答题的智能机器人，采用模块化面向对象设计。
 
-`bilibili_senior_llm` 是一个用于帮助通过 B站硬核会员考试的工具。该工具利用 OCR 技术识别屏幕上的题目和选项，然后使用语言模型（如 GPT-4）来生成答案，并模拟鼠标点击来自动答题。
+## ✨ 特性
 
-## 功能特点
+- 🎯 **模块化设计** - 清晰的目录结构，易于维护和扩展
+- 🔧 **可插拔架构** - 基于抽象基类，支持自定义实现
+- 🤖 **智能识别** - 使用OCR技术提取题目
+- 🧠 **AI答题** - 集成OpenAI GPT模型分析题目
+- 🖱️ **自动控制** - 自动截图和模拟点击
 
-- 使用 PaddleOCR 进行文字识别。
-- 自动合并接近的文字框以提高识别准确性。
-- 使用 GPT-4 模型生成答案。
-- 模拟鼠标点击选择正确答案。
+## 📁 项目结构
 
-## 效果
-
-使用 `gpt-4` 模型，并在知识区进行考试时，可以达到较高的通过率。
-
-## 安装依赖
-
-确保已安装以下依赖库：
-
-```bash
-pip install paddlepaddle paddleocr
+```
+bilibili_senior_llm/
+├── main.py                    # 主程序入口
+├── README.md                  # 项目说明
+├── LICENSE                    # 许可证
+├── .gitignore                 # Git忽略配置
+│
+├── src/                       # 源代码目录
+│   ├── __init__.py
+│   │
+│   ├── core/                  # 核心模块
+│   │   ├── __init__.py
+│   │   ├── base.py           # 抽象基类定义
+│   │   └── quiz_bot.py       # 答题机器人主类
+│   │
+│   ├── extractors/            # 题目提取器
+│   │   ├── __init__.py
+│   │   └── ocr_extractor.py  # OCR提取器实现
+│   │
+│   ├── generators/            # 答案生成器
+│   │   ├── __init__.py
+│   │   └── openai_generator.py  # OpenAI生成器实现
+│   │
+│   └── controllers/           # 控制器
+│       ├── __init__.py
+│       └── bluestack_controller.py  # BlueStacks控制器实现
+│
+├── docs/                      # 文档目录
+│   ├── README_NEW.md         # 详细使用文档
+│   └── ARCHITECTURE.md       # 架构设计文档
+│
+└── legacy/                    # 旧代码备份
+    ├── main_old.py           # 旧版主程序
+    ├── cap.py                # 旧版截图工具
+    ├── llm.py                # 旧版LLM调用
+    └── README_v1.md          # 旧版README
 ```
 
-此外，还需要安装 `pyautogui` 库用于屏幕截图和鼠标操作：
+## 🏗️ 架构设计
 
-```bash
-pip install pyautogui
+### 核心抽象基类
+
+项目定义了三个核心抽象基类，确保可扩展性：
+
+1. **QuestionExtractorBase** - 题目提取器基类
+   - 定义题目提取接口
+   - 当前实现：OCR提取器
+
+2. **AnswerGeneratorBase** - 答案生成器基类
+   - 定义答案生成接口
+   - 当前实现：OpenAI生成器
+
+3. **AndroidControllerBase** - 控制器基类
+   - 定义设备控制接口
+   - 当前实现：BlueStacks控制器
+
+### 工作流程
+
+```
+1. 截图 → BlueStackController.get_screenshot()
+2. 识别 → OCRExtractor.extract_question()
+3. 分析 → OpenAIGenerator.get_answer()
+4. 点击 → BlueStackController.click()
 ```
 
-## 配置文件
+## 🚀 快速开始
 
-你需要配置 `llm.py` 文件中的 `get_ans` 函数，确保它能够调用你的语言模型 API 并返回答案。
+### 安装依赖
 
-## 使用方法
+```bash
+pip install paddleocr openai pillow numpy pygetwindow pywin32
+```
 
-1. **获取屏幕截图**：确保你的设备或模拟器窗口标题为 "BlueStacks App Player" 或其他你定义的标题。
-2. **运行脚本**：启动 `main.py` 脚本。
-3. **开始考试**：在 B站上开始硬核会员考试，脚本将自动进行识别和答题。
+### 基本使用
 
-## 注意事项
+```python
+from src.core import QuizBot
 
-- 确保考试界面在屏幕中央，并且没有遮挡物。
-- 如果考试界面不在屏幕中央，请调整截图区域。
-- 请遵循 B站的相关规定，合理使用此工具，避免违规。
+# 创建机器人实例
+bot = QuizBot(
+    window_title="BlueStacks App Player",
+    model="gpt-4o"
+)
+
+# 运行
+bot.run()
+```
+
+### 运行主程序
+
+```bash
+python main.py
+```
+
+## 🔧 自定义扩展
+
+### 添加新的题目提取器
+
+```python
+from src.core.base import QuestionExtractorBase
+
+class UIParserExtractor(QuestionExtractorBase):
+    """使用UI解析获取题目"""
+    
+    def extract_question(self, image):
+        # 实现你的逻辑
+        pass
+    
+    def set_merge_threshold(self, threshold):
+        pass
+```
+
+### 添加新的答案生成器
+
+```python
+from src.core.base import AnswerGeneratorBase
+
+class ClaudeGenerator(AnswerGeneratorBase):
+    """使用Claude模型生成答案"""
+    
+    def get_answer(self, question_body):
+        # 实现你的逻辑
+        pass
+    
+    def extract_option_number(self, answer):
+        pass
+```
+
+### 添加新的控制器
+
+```python
+from src.core.base import AndroidControllerBase
+
+class ADBController(AndroidControllerBase):
+    """使用ADB直接控制设备"""
+    
+    def get_screenshot(self, save_debug=False):
+        # 实现你的逻辑
+        pass
+    
+    def click(self, x, y):
+        pass
+    
+    def calculate_click_position(self, bbox, offset):
+        pass
+```
+
+### 使用自定义实现
+
+```python
+from src.core import QuizBot
+from your_module import UIParserExtractor, ClaudeGenerator
+
+# 创建自定义实例
+bot = QuizBot()
+
+# 替换为自定义实现
+bot.question_extractor = UIParserExtractor()
+bot.answer_generator = ClaudeGenerator()
+
+bot.run()
+```
+
+## ⚙️ 配置选项
+
+```python
+# 调试模式（保存截图）
+bot.set_debug_mode(True)
+
+# 点击延迟（秒）
+bot.set_click_delay(2.0)
+
+# 截图裁剪比例 (左, 上, 右, 下)
+bot.set_crop_ratios(0.0, 0.2, 1.0, 0.7)
+
+# OCR文本框合并阈值
+bot.set_merge_threshold(30)
+
+# 限制题目数量
+bot.run(max_questions=10)
+```
+
+## 📚 详细文档
+
+- [详细使用文档](docs/README_NEW.md)
+- [架构设计说明](docs/ARCHITECTURE.md)
+
+## 🛠️ 技术栈
+
+- **OCR**: PaddleOCR
+- **LLM**: OpenAI GPT-4
+- **图像处理**: Pillow, NumPy
+- **窗口控制**: PyGetWindow, PyWin32
+- **语言**: Python 3.8+
+
+## 📝 版本历史
+
+### v2.0.0 (当前版本)
+- ✅ 完全重构为模块化架构
+- ✅ 添加抽象基类支持扩展
+- ✅ 清晰的目录结构
+- ✅ 更好的命名和文档
+
+### v1.0.0
+- 基础功能实现
+- OCR识别和LLM答题
+
+## 🤝 贡献
+
+欢迎提交Issue和Pull Request！
+
+## 📄 许可证
+
+本项目采用 MIT 许可证。详见 [LICENSE](LICENSE) 文件。
+
+## ⚠️ 注意事项
+
+1. 需要配置 OpenAI API Key（环境变量或代码中设置）
+2. 确保模拟器窗口标题正确
+3. 根据实际情况调整截图裁剪比例
+4. OCR模型需要提前下载
+
+## 📮 联系方式
+
+如有问题，请提交Issue或联系项目维护者。

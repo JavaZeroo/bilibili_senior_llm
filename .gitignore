@@ -6,6 +6,27 @@ __pycache__/
 # C extensions
 *.so
 
+# 项目特定文件
+screenshot.jpg
+no_border_img.jpg
+final_img.jpg
+screensfinal_imghot.jpg
+*.jpg
+*.png
+
+# OCR模型文件
+det_model_dir/
+rec_model_dir/
+cls_model_dir/
+
+# API密钥配置
+.env
+config.ini
+
+# 调试文件
+debug/
+*.log
+
 # Distribution / packaging
 .Python
 build/
