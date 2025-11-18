@@ -30,23 +30,14 @@ adb:
   auto_setup: true  # 自动下载 ADB、检测设备、选择设备
   device_id: null   # 留空自动检测，或指定设备 ID
 
-# BlueStacks 配置（传统模式）
-# app:
-#   window_title: "BlueStacks App Player"
-
-# OCR 配置（可选，使用自定义模型）
-# ocr:
-#   det_model_dir: /path/to/ch_PP-OCRv4_det_infer
-#   rec_model_dir: /path/to/ch_PP-OCRv4_rec_infer
-#   use_gpu: false
-#   ocr_version: PP-OCRv4
-
 # 其他配置
 crop_ratios: [0.0, 0.2, 1.0, 0.7]  # 截图裁剪比例
 merge_threshold: 30                 # OCR 文本框合并阈值
 click_delay: 2.0                    # 点击延迟（秒）
-debug_mode: false                   # 调试模式
+debug_mode: false                   # 调试模式，保存OCR结果
 ```
+
+> ✅理论上配置了apikey+模拟器开启adb调试，就可以了
 
 ### 3. 运行程序
 
@@ -55,6 +46,7 @@ python main.py
 ```
 
 首次使用 ADB 模式时，程序会自动：
+
 - 检测或下载 ADB 工具
 - 检测已连接的设备/模拟器
 - 自动选择设备（单设备）或提示选择（多设备）
@@ -64,13 +56,12 @@ python main.py
 ### 控制器模式
 
 **ADB 模式**（推荐）
+
 - 支持真机和所有模拟器
 - 自动管理 ADB 工具
 - 更稳定可靠
 
-**BlueStacks 模式**
-- 仅支持 BlueStacks 模拟器
-- 通过窗口标题查找
+~~**BlueStacks 模式（可能不支持了）**~~
 
 ### 常用配置项
 
@@ -82,6 +73,16 @@ python main.py
 | `crop_ratios` | 截图裁剪比例 | `[0.0, 0.2, 1.0, 0.7]` |
 | `click_delay` | 点击延迟（秒） | `2.0` |
 | `debug_mode` | 保存调试截图 | `false` |
+
+## 截图
+
+调试+运行100个问题，大概花费3分钱
+
+![](imgs/api_usage.png)
+
+选择`文史`+`知识`内容，得分情况：
+
+![](imgs/result.png)
 
 ## 许可证
 
