@@ -4,7 +4,7 @@
 """
 from paddleocr import PaddleOCR
 import numpy as np
-from typing import List, Tuple
+from typing import List, Sequence, Tuple, Union
 from PIL import Image
 from src.core.base import QuestionExtractorBase
 
@@ -12,24 +12,17 @@ from src.core.base import QuestionExtractorBase
 class QuestionExtractor(QuestionExtractorBase):
     """题目提取器 - 使用OCR技术从截图中提取题目和选项"""
     
-    def __init__(self, 
-                 det_model_dir: str = "det_model_dir",
-                 rec_model_dir: str = "rec_model_dir", 
-                 cls_model_dir: str = "cls_model_dir"):
+    def __init__(self, ocr_version: str = "PP-OCRv4"):
         """
         初始化OCR模型
         
         Args:
-            det_model_dir: 检测模型目录
-            rec_model_dir: 识别模型目录
-            cls_model_dir: 分类模型目录
+            ocr_version: 使用的PPOCR模型版本 (如 "PP-OCRv3" / "PP-OCRv4")
         """
         self.ocr = PaddleOCR(
             use_angle_cls=True,
             lang="ch",
-            det_model_dir=det_model_dir,
-            rec_model_dir=rec_model_dir,
-            cls_model_dir=cls_model_dir,
+            ocr_version=ocr_version,
         )
         self.merge_threshold = 20  # 合并文本框的距离阈值
     
@@ -47,10 +40,11 @@ class QuestionExtractor(QuestionExtractorBase):
         img_array = np.array(image)
         
         # OCR识别
-        result = self.ocr.ocr(img_array)
-        
+        result = self.ocr.ocr(img_array, det=True, rec=True, cls=True)
+
         # 合并相近的文本框
-        merged_results = self._merge_ocr_results(result[0])
+        normalized_results = self._normalize_ocr_results(result)
+        merged_results = self._merge_ocr_results(normalized_results)
         
         # 格式化题目
         question_body = self._format_question(merged_results)
@@ -128,10 +122,10 @@ class QuestionExtractor(QuestionExtractorBase):
             threshold = self.merge_threshold
             
         merged_results = []
-        current_box, current_text = results[0][0], results[0][1][0]
-        
+        current_box, current_text = results[0][0], results[0][1]
+
         for i in range(1, len(results)):
-            bbox, text = results[i][0], results[i][1][0]
+            bbox, text = results[i][0], results[i][1]
             
             # 检查当前bbox是否与下一个bbox接近
             if self._is_close(current_box, bbox, threshold):
@@ -173,3 +167,48 @@ class QuestionExtractor(QuestionExtractorBase):
     def set_merge_threshold(self, threshold: int):
         """设置文本框合并的距离阈值"""
         self.merge_threshold = threshold
+
+    def _normalize_ocr_results(self, result: Union[List, Tuple]) -> List[Tuple[List, str]]:
+        """兼容PaddleOCR 2.x与3.x的返回结果格式。
+
+        PaddleOCR 2.x 返回 [[(bbox, (text, score)), ...]]
+        PaddleOCR 3.x 返回 [[{'text': str, 'confidence': float, 'text_region': [...]}]] 或类似结构。
+        该方法将其统一为 [(bbox, text)] 的形式，方便后续合并。
+        """
+
+        if not result:
+            return []
+
+        # PaddleOCR通常会为每张图像返回一个列表
+        if isinstance(result, (list, tuple)) and result:
+            first_entry = result[0]
+            if isinstance(first_entry, (list, tuple)):
+                candidate: Sequence = first_entry
+            else:
+                candidate = result
+        else:
+            candidate = []
+
+        normalized: List[Tuple[List, str]] = []
+
+        for item in candidate:
+            bbox: List = []
+            text: str = ""
+
+            if isinstance(item, (list, tuple)):
+                # 旧格式 (bbox, (text, score))
+                bbox = item[0]
+                if isinstance(item[1], (list, tuple)):
+                    text = item[1][0]
+                else:
+                    text = str(item[1])
+            elif isinstance(item, dict):
+                bbox = item.get("text_region") or item.get("points") or item.get("bbox")
+                text = item.get("text") or item.get("transcription") or ""
+            else:
+                continue
+
+            if bbox and text is not None:
+                normalized.append((bbox, text))
+
+        return normalized

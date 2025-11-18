@@ -82,7 +82,7 @@ bilibili_senior_llm/
 ### 安装依赖
 
 ```bash
-pip install paddleocr openai pillow numpy pygetwindow pywin32
+pip install "paddlepaddle>=3.0.0" "paddleocr>=3.0.0" openai pillow numpy pygetwindow pywin32
 ```
 
 ### 基本使用
@@ -98,6 +98,34 @@ bot = QuizBot(
 
 # 运行
 bot.run()
+```
+
+### 配置PaddleOCR 3.x
+
+`config.yaml` 中新增了 `ocr` 区块，可以直接配置 PaddleOCR 3.x/PP-OCRv4 的路径和参数：
+
+```yaml
+ocr:
+  det_model_dir: /path/to/ch_PP-OCRv4_det_infer
+  rec_model_dir: /path/to/ch_PP-OCRv4_rec_infer
+  cls_model_dir: /path/to/ch_ppocr_mobile_v2.0_cls_infer
+  use_gpu: true
+  show_log: false
+  ocr_version: PP-OCRv4
+```
+
+也可以在代码中直接构造自定义的 `QuestionExtractor`：
+
+```python
+from src.extractors import QuestionExtractor
+
+question_extractor = QuestionExtractor(
+    det_model_dir="/path/to/det",
+    rec_model_dir="/path/to/rec",
+    cls_model_dir="/path/to/cls",
+    ocr_version="PP-OCRv4",
+    use_gpu=True,
+)
 ```
 
 ### 运行主程序

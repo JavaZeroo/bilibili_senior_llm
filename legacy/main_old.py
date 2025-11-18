@@ -13,6 +13,7 @@ ocr = PaddleOCR(
     det_model_dir="det_model_dir",
     rec_model_dir="rec_model_dir",
     cls_model_dir="cls_model_dir",
+    ocr_version="PP-OCRv4",
 )
 
 def is_close(bbox1, bbox2, threshold=10):
@@ -77,8 +78,37 @@ while True:
     img_array = np.array(
         screenshot
     )  # 还记得上面截图得到的 screenshot 嘛，在这里被转化成了 numpy 数组
-    result = ocr.ocr(img_array)  # OCR 识别
-    result = merge_ocr_results(result[0])
+    result = ocr.ocr(img_array, det=True, rec=True, cls=True)  # OCR 识别
+
+    def normalize_ocr_results(raw_result):
+        if not raw_result:
+            return []
+
+        if isinstance(raw_result, list) and raw_result:
+            first = raw_result[0]
+            if isinstance(first, (list, tuple)):
+                candidate = first
+            else:
+                candidate = raw_result
+        else:
+            candidate = []
+
+        normalized = []
+        for item in candidate:
+            if isinstance(item, (list, tuple)):
+                bbox = item[0]
+                text = item[1][0] if isinstance(item[1], (list, tuple)) else item[1]
+            elif isinstance(item, dict):
+                bbox = item.get("text_region") or item.get("points")
+                text = item.get("text") or item.get("transcription")
+            else:
+                continue
+
+            if bbox and text:
+                normalized.append((bbox, text))
+        return normalized
+
+    result = merge_ocr_results(normalize_ocr_results(result))
     # print(result)
     questionBody = ""
     for idx, line in enumerate(result):

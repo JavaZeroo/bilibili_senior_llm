@@ -32,7 +32,15 @@ class QuizBot:
         self.config = cfg_loader.load_config(config_path)
 
         # 初始化三个核心模块（通过基类注入实现可替换性）
-        self.question_extractor: QuestionExtractorBase = QuestionExtractor()
+        ocr_cfg = self.config.get("ocr", {})
+        self.question_extractor: QuestionExtractorBase = QuestionExtractor(
+            det_model_dir=ocr_cfg.get("det_model_dir", "det_model_dir"),
+            rec_model_dir=ocr_cfg.get("rec_model_dir", "rec_model_dir"),
+            cls_model_dir=ocr_cfg.get("cls_model_dir", "cls_model_dir"),
+            use_gpu=ocr_cfg.get("use_gpu", False),
+            show_log=ocr_cfg.get("show_log", False),
+            ocr_version=ocr_cfg.get("ocr_version", "PP-OCRv4"),
+        )
         self.answer_generator: AnswerGeneratorBase = AnswerGenerator(model=self.config.get("llm", {}).get("model", model), api_key=self.config.get("llm", {}).get("api_key", api_key))
 
         # 根据配置选择控制器实现（adb 或 bluestacks）

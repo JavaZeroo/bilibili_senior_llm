@@ -113,9 +113,33 @@ bot.set_crop_ratios(0.0, 0.2, 1.0, 0.7)
 bot.set_merge_threshold(30)
 ```
 
+### PaddleOCR 3.x 配置
+
+在 `config.yaml` 中通过 `ocr` 区块即可配置 PP-OCRv4 模型路径、GPU 等参数：
+
+```yaml
+ocr:
+  det_model_dir: /path/to/ch_PP-OCRv4_det_infer
+  rec_model_dir: /path/to/ch_PP-OCRv4_rec_infer
+  cls_model_dir: /path/to/ch_ppocr_mobile_v2.0_cls_infer
+  use_gpu: false
+  ocr_version: PP-OCRv4
+```
+
+如需在代码内覆盖配置，可以直接实例化 `QuestionExtractor` 并注入：
+
+```python
+from src.extractors import QuestionExtractor
+from src.core import QuizBot
+
+bot = QuizBot()
+bot.question_extractor = QuestionExtractor(ocr_version="PP-OCRv4", use_gpu=True)
+```
+
 ## 依赖库
 
-- paddleocr: OCR文字识别
+- paddlepaddle>=3.0.0: 深度学习框架
+- paddleocr>=3.0.0: OCR文字识别
 - openai: LLM接口
 - PIL/Pillow: 图像处理
 - numpy: 数组处理
