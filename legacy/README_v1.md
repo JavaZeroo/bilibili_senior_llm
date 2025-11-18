@@ -20,7 +20,7 @@
 确保已安装以下依赖库：
 
 ```bash
-pip install paddlepaddle paddleocr
+pip install "paddlepaddle>=3.0.0" "paddleocr>=3.0.0"
 ```
 
 此外，还需要安装 `pyautogui` 库用于屏幕截图和鼠标操作：

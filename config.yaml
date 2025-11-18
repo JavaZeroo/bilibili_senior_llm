@@ -14,6 +14,14 @@ llm:
   model: gpt-4o
   api_key: null
 
+ocr:
+  det_model_dir: det_model_dir
+  rec_model_dir: rec_model_dir
+  cls_model_dir: cls_model_dir
+  use_gpu: false
+  show_log: false
+  ocr_version: PP-OCRv4
+
 app:
   window_title: "BlueStacks App Player"
   click_delay: 1.5
