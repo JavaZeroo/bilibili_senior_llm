@@ -15,8 +15,6 @@ def main():
     )
     
     # 可选配置
-    bot.set_debug_mode(False)  # 设置为True可保存调试图片
-    bot.set_click_delay(1.5)  # 点击后等待时间
     
     # 如果需要调整截图区域,可以设置裁剪比例 (左, 上, 右, 下)
     # bot.set_crop_ratios(0.0, 0.2, 1.0, 0.7)
@@ -26,7 +24,7 @@ def main():
     
     # 运行答题机器人
     # 参数max_questions可以限制题目数量,None表示无限循环
-    bot.run(max_questions=None)
+    bot.run(max_questions=100)
 
 
 if __name__ == "__main__":

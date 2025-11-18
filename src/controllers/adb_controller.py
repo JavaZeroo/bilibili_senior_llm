@@ -76,6 +76,7 @@ class ADBController(AndroidControllerBase):
             gray_img = cropped_img.convert("L")
             binary_img = gray_img.point(lambda x: 255 if x > self.bw_threshold else 0, mode='1')
             final_img = binary_img.convert("RGB")
+            print(f"{save_debug=}")
             if save_debug:
                 final_img.save("adb_final_img.jpg")
             # 返回裁剪区域的绝对坐标
