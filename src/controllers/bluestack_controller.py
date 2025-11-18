@@ -11,29 +11,29 @@ import win32con
 import ctypes
 from typing import Tuple
 from src.core.base import AndroidControllerBase
+from src.core import config as cfg_loader
 
 
 class AndroidController(AndroidControllerBase):
     """安卓模拟器控制器 - 负责截图和模拟点击"""
     
     def __init__(self, window_title: str = "BlueStacks App Player"):
-        """
-        初始化控制器
-        
-        Args:
-            window_title: 模拟器窗口标题
+        """初始化控制器
+
+        支持通过全局配置覆盖默认截图和二值化设置。如果在 `config.yaml` 中设置
+        `screenshot` 字段，本类会自动读取并使用。
         """
         self.window_title = window_title
         self.dpi_scale = 1.0
-        
+
         # 设置DPI感知
         self._set_dpi_awareness()
-        
-        # 截图裁剪比例 (左, 上, 右, 下)
-        self.crop_ratios = (0.0, 0.2, 1.0, 0.7)
-        
-        # 二值化阈值
-        self.bw_threshold = 200
+
+        # 尝试从配置读取截图参数
+        cfg = cfg_loader.load_config()
+        screenshot_cfg = cfg.get("screenshot", {})
+        self.crop_ratios = tuple(screenshot_cfg.get("crop_ratios", [0.0, 0.2, 1.0, 0.7]))
+        self.bw_threshold = screenshot_cfg.get("bw_threshold", 200)
     
     def _set_dpi_awareness(self):
         """设置DPI感知"""

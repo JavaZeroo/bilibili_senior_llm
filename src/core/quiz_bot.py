@@ -8,6 +8,8 @@ from src.extractors import QuestionExtractor
 from src.generators import AnswerGenerator
 from src.controllers import AndroidController
 from src.core.base import QuestionExtractorBase, AnswerGeneratorBase, AndroidControllerBase
+from src.controllers.adb_controller import ADBController
+from src.core import config as cfg_loader
 
 
 class QuizBot:
@@ -16,7 +18,8 @@ class QuizBot:
     def __init__(self, 
                  window_title: str = "BlueStacks App Player",
                  model: str = "gpt-4o",
-                 api_key: Optional[str] = None):
+                 api_key: Optional[str] = None,
+                 config_path: Optional[str] = None):
         """
         初始化答题机器人
         
@@ -25,14 +28,26 @@ class QuizBot:
             model: LLM模型名称
             api_key: OpenAI API密钥
         """
+        # 读取配置（合并默认）
+        self.config = cfg_loader.load_config(config_path)
+
         # 初始化三个核心模块（通过基类注入实现可替换性）
         self.question_extractor: QuestionExtractorBase = QuestionExtractor()
-        self.answer_generator: AnswerGeneratorBase = AnswerGenerator(model=model, api_key=api_key)
-        self.android_controller: AndroidControllerBase = AndroidController(window_title=window_title)
+        self.answer_generator: AnswerGeneratorBase = AnswerGenerator(model=self.config.get("llm", {}).get("model", model), api_key=self.config.get("llm", {}).get("api_key", api_key))
+
+        # 根据配置选择控制器实现（adb 或 bluestacks）
+        controller_type = self.config.get("controller", {}).get("type", "adb")
+        if controller_type == "adb":
+            adb_cfg = self.config.get("adb", {})
+            self.android_controller: AndroidControllerBase = ADBController(adb_path=adb_cfg.get("adb_path", "adb"), device_id=adb_cfg.get("device_id", None), config=self.config)
+        else:
+            # bluetacks controller still accepts window_title
+            self.android_controller: AndroidControllerBase = AndroidController(window_title=window_title)
         
-        # 配置参数
-        self.click_delay = 1.5  # 点击后等待时间(秒)
-        self.debug_mode = False  # 是否保存调试图片
+        # 应用级配置
+        app_cfg = self.config.get("app", {})
+        self.click_delay = app_cfg.get("click_delay", 1.5)
+        self.debug_mode = app_cfg.get("debug_mode", False)
     
     def process_one_question(self) -> bool:
         """

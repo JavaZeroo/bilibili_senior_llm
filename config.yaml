@@ -1,0 +1,20 @@
+# 配置文件：控制器类型、ADB、截图、LLM、应用级配置
+controller:
+  type: adb  # 'adb' 或 'bluestacks'
+
+adb:
+  adb_path: adb
+  device_id: null
+
+screenshot:
+  crop_ratios: [0.0, 0.2, 1.0, 0.7]
+  bw_threshold: 200
+
+llm:
+  model: gpt-4o
+  api_key: null
+
+app:
+  window_title: "BlueStacks App Player"
+  click_delay: 1.5
+  debug_mode: false
