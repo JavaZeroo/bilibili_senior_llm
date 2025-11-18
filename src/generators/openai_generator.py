@@ -10,18 +10,24 @@ from src.core.base import AnswerGeneratorBase
 class AnswerGenerator(AnswerGeneratorBase):
     """答案生成器 - 使用LLM分析题目并给出答案"""
     
-    def __init__(self, model: str = "gpt-4o", api_key: Optional[str] = None):
+    def __init__(self, model: str = "gpt-4o", api_key: Optional[str] = None, 
+                 base_url: Optional[str] = None):
         """
         初始化答案生成器
         
         Args:
             model: 使用的模型名称
-            api_key: OpenAI API密钥，如果为None则使用环境变量
+            api_key: API密钥，如果为None则使用环境变量
+            base_url: 自定义API端点 (如 https://api.deepseek.com/v1)
         """
+        # 初始化客户端配置
+        client_kwargs = {}
         if api_key:
-            self.client = OpenAI(api_key=api_key)
-        else:
-            self.client = OpenAI()
+            client_kwargs['api_key'] = api_key
+        if base_url:
+            client_kwargs['base_url'] = base_url
+            
+        self.client = OpenAI(**client_kwargs)
         self.model = model
         
         # 系统提示词

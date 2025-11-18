@@ -5,22 +5,43 @@ ADB控制器模块
 import subprocess
 import tempfile
 import os
-from typing import Tuple
+from typing import Tuple, Optional
 from PIL import Image
 from src.core.base import AndroidControllerBase
+from src.utils.adb_helper import ADBHelper
 
 class ADBController(AndroidControllerBase):
     """通过adb控制安卓设备截图和点击"""
-    def __init__(self, adb_path: str = "adb", device_id: str = None, config: dict = None):
-        # 可以通过 config dict 提供更细粒度配置
-        self.adb_path = adb_path
-        self.device_id = device_id
+    def __init__(self, adb_path: str = "adb", device_id: Optional[str] = None, config: dict = None, auto_setup: bool = True):
+        """
+        初始化 ADB 控制器
+        
+        Args:
+            adb_path: ADB 可执行文件路径
+            device_id: 设备 ID，None 表示自动选择
+            config: 配置字典
+            auto_setup: 是否自动设置 ADB 环境（下载、检测设备等）
+        """
         # 从 config 中读取截图和二值化设置（如果提供）
         if config is None:
             config = {}
         screenshot_cfg = config.get("screenshot", {})
         self.crop_ratios = tuple(screenshot_cfg.get("crop_ratios", [0.0, 0.2, 1.0, 0.7]))
         self.bw_threshold = screenshot_cfg.get("bw_threshold", 200)
+        
+        # 如果启用自动设置
+        if auto_setup:
+            helper = ADBHelper()
+            adb_path_resolved, device_id_resolved = helper.ensure_adb_ready(auto_select_device=True)
+            
+            if adb_path_resolved is None:
+                raise RuntimeError("ADB 环境设置失败")
+            
+            self.adb_path = adb_path_resolved
+            self.device_id = device_id_resolved if device_id is None else device_id
+        else:
+            self.adb_path = adb_path
+            self.device_id = device_id
 
     def _adb_cmd(self, args):
         cmd = [self.adb_path]

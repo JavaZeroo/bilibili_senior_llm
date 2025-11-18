@@ -12,7 +12,7 @@ DEFAULT_CONFIG = {
     "controller": {"type": "adb"},
     "adb": {"adb_path": "adb", "device_id": None},
     "screenshot": {"crop_ratios": [0.0, 0.2, 1.0, 0.7], "bw_threshold": 200},
-    "llm": {"model": "gpt-4o", "api_key": None},
+    "llm": {"model": "gpt-4o", "api_key": None, "base_url": None},
     "app": {"window_title": "BlueStacks App Player", "click_delay": 1.5, "debug_mode": False},
 }
 

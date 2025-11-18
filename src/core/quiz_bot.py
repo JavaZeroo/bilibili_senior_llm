@@ -34,20 +34,26 @@ class QuizBot:
         # 初始化三个核心模块（通过基类注入实现可替换性）
         ocr_cfg = self.config.get("ocr", {})
         self.question_extractor: QuestionExtractorBase = QuestionExtractor(
-            det_model_dir=ocr_cfg.get("det_model_dir", "det_model_dir"),
-            rec_model_dir=ocr_cfg.get("rec_model_dir", "rec_model_dir"),
-            cls_model_dir=ocr_cfg.get("cls_model_dir", "cls_model_dir"),
-            use_gpu=ocr_cfg.get("use_gpu", False),
-            show_log=ocr_cfg.get("show_log", False),
             ocr_version=ocr_cfg.get("ocr_version", "PP-OCRv4"),
         )
-        self.answer_generator: AnswerGeneratorBase = AnswerGenerator(model=self.config.get("llm", {}).get("model", model), api_key=self.config.get("llm", {}).get("api_key", api_key))
+        llm_cfg = self.config.get("llm", {})
+        self.answer_generator: AnswerGeneratorBase = AnswerGenerator(
+            model=llm_cfg.get("model", model), 
+            api_key=llm_cfg.get("api_key", api_key),
+            base_url=llm_cfg.get("base_url")
+        )
 
         # 根据配置选择控制器实现（adb 或 bluestacks）
         controller_type = self.config.get("controller", {}).get("type", "adb")
         if controller_type == "adb":
             adb_cfg = self.config.get("adb", {})
-            self.android_controller: AndroidControllerBase = ADBController(adb_path=adb_cfg.get("adb_path", "adb"), device_id=adb_cfg.get("device_id", None), config=self.config)
+            # auto_setup=True 会自动下载 ADB、检测设备并选择
+            self.android_controller: AndroidControllerBase = ADBController(
+                adb_path=adb_cfg.get("adb_path", "adb"), 
+                device_id=adb_cfg.get("device_id", None), 
+                config=self.config,
+                auto_setup=adb_cfg.get("auto_setup", True)
+            )
         else:
             # bluetacks controller still accepts window_title
             self.android_controller: AndroidControllerBase = AndroidController(window_title=window_title)
