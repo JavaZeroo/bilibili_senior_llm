@@ -1,0 +1,13 @@
+# 核心依赖
+paddlepaddle>=3.0.0
+paddleocr>=3.0.0
+openai>=1.0.0
+Pillow>=9.0.0
+numpy>=1.21.0
+pygetwindow>=0.0.9
+pywin32>=300
+pyyaml>=6.0
+
+
+# 可选：GPU支持（如果有NVIDIA GPU）
+# paddlepaddle-gpu>=3.0.0

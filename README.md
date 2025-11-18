@@ -1,46 +1,88 @@
-# bilibili_senior_llm
+# 自动答题机器人
 
-## 简介
+一个用于在安卓设备上自动获取题目并答题的智能机器人。支持真机和所有模拟器（BlueStacks、夜神、MuMu等）。
 
-`bilibili_senior_llm` 是一个用于帮助通过 B站硬核会员考试的工具。该工具利用 OCR 技术识别屏幕上的题目和选项，然后使用语言模型（如 GPT-4）来生成答案，并模拟鼠标点击来自动答题。
+## 快速开始
 
-## 功能特点
-
-- 使用 PaddleOCR 进行文字识别。
-- 自动合并接近的文字框以提高识别准确性。
-- 使用 GPT-4 模型生成答案。
-- 模拟鼠标点击选择正确答案。
-
-## 效果
-
-使用 `gpt-4` 模型，并在知识区进行考试时，可以达到较高的通过率。
-
-## 安装依赖
-
-确保已安装以下依赖库：
+### 1. 安装依赖
 
 ```bash
-pip install paddlepaddle paddleocr
+pip install "paddlepaddle>=3.0.0" "paddleocr>=3.0.0" openai pillow numpy pygetwindow pywin32
 ```
 
-此外，还需要安装 `pyautogui` 库用于屏幕截图和鼠标操作：
+### 2. 配置文件
+
+编辑 `config.yaml`，设置你的 API Key：
+
+```yaml
+# LLM 配置
+llm:
+  model: deepseek-chat
+  api_key: your-api-key-here  # 替换为你的 API Key
+  base_url: https://api.deepseek.com/v1
+
+# 控制器模式（推荐使用 ADB）
+controller:
+  type: adb  # 或 bluestacks
+
+# ADB 配置（推荐）
+adb:
+  auto_setup: true  # 自动下载 ADB、检测设备、选择设备
+  device_id: null   # 留空自动检测，或指定设备 ID
+
+# BlueStacks 配置（传统模式）
+# app:
+#   window_title: "BlueStacks App Player"
+
+# OCR 配置（可选，使用自定义模型）
+# ocr:
+#   det_model_dir: /path/to/ch_PP-OCRv4_det_infer
+#   rec_model_dir: /path/to/ch_PP-OCRv4_rec_infer
+#   use_gpu: false
+#   ocr_version: PP-OCRv4
+
+# 其他配置
+crop_ratios: [0.0, 0.2, 1.0, 0.7]  # 截图裁剪比例
+merge_threshold: 30                 # OCR 文本框合并阈值
+click_delay: 2.0                    # 点击延迟（秒）
+debug_mode: false                   # 调试模式
+```
+
+### 3. 运行程序
 
 ```bash
-pip install pyautogui
+python main.py
 ```
 
-## 配置文件
+首次使用 ADB 模式时，程序会自动：
+- 检测或下载 ADB 工具
+- 检测已连接的设备/模拟器
+- 自动选择设备（单设备）或提示选择（多设备）
 
-你需要配置 `llm.py` 文件中的 `get_ans` 函数，确保它能够调用你的语言模型 API 并返回答案。
+## 配置说明
 
-## 使用方法
+### 控制器模式
 
-1. **获取屏幕截图**：确保你的设备或模拟器窗口标题为 "BlueStacks App Player" 或其他你定义的标题。
-2. **运行脚本**：启动 `main.py` 脚本。
-3. **开始考试**：在 B站上开始硬核会员考试，脚本将自动进行识别和答题。
+**ADB 模式**（推荐）
+- 支持真机和所有模拟器
+- 自动管理 ADB 工具
+- 更稳定可靠
 
-## 注意事项
+**BlueStacks 模式**
+- 仅支持 BlueStacks 模拟器
+- 通过窗口标题查找
 
-- 确保考试界面在屏幕中央，并且没有遮挡物。
-- 如果考试界面不在屏幕中央，请调整截图区域。
-- 请遵循 B站的相关规定，合理使用此工具，避免违规。
+### 常用配置项
+
+| 配置项 | 说明 | 默认值 |
+|--------|------|--------|
+| `llm.api_key` | LLM API 密钥 | 必填 |
+| `controller.type` | 控制器类型 | `adb` |
+| `adb.auto_setup` | 自动设置 ADB | `true` |
+| `crop_ratios` | 截图裁剪比例 | `[0.0, 0.2, 1.0, 0.7]` |
+| `click_delay` | 点击延迟（秒） | `2.0` |
+| `debug_mode` | 保存调试截图 | `false` |
+
+## 许可证
+
+MIT License - 详见 [LICENSE](LICENSE) 文件。

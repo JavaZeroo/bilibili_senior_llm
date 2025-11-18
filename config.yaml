@@ -1,0 +1,25 @@
+# 配置文件：控制器类型、ADB、截图、LLM、应用级配置
+controller:
+  type: adb  # 'adb' 或 'bluestacks'
+
+adb:
+  adb_path: adb  # ADB 路径，如果 auto_setup=true 则自动处理
+  device_id: null  # 设备 ID，null 表示自动选择
+  auto_setup: true  # 自动下载 ADB（如果没有）并自动检测/选择设备
+
+screenshot:
+  crop_ratios: [0.0, 0.2, 1.0, 0.7]
+  bw_threshold: 200
+
+llm:
+  model: deepseek-chat
+  api_key: YOUR_API_KEY_HERE  # 替换为你的 DeepSeek API Key
+  base_url: https://api.deepseek.com/v1  # 自定义API端点，如 https://api.deepseek.com/v1
+
+ocr:
+  ocr_version: PP-OCRv4
+
+app:
+  window_title: "BlueStacks App Player"
+  click_delay: 1.5
+  debug_mode: false
