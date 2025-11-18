@@ -1,4 +1,4 @@
-# 自动答题机器人
+# bilibili_senior_llm（b站硬核会员考试llm自动答题）
 
 一个用于在安卓设备上自动获取题目并答题的智能机器人。支持真机和所有模拟器（BlueStacks、夜神、MuMu等）。
 
@@ -83,6 +83,11 @@ python main.py
 选择`文史`+`知识`内容，得分情况：
 
 ![](imgs/result.png)
+
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=JavaZeroo/bilibili_senior_llm&type=date&legend=top-left)](https://www.star-history.com/#JavaZeroo/bilibili_senior_llm&type=date&legend=top-left)
 
 ## 许可证
 
